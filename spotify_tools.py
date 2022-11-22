@@ -1,15 +1,20 @@
-import pandas as pd 
+'''Tools for taking a big pile of JSON files in a zip archive and turning
+them into something useful for either jupyter books or excel spreadsheets
+'''
+import os
+import string
 import json
 import zipfile
+import pandas as pd
 from datetime import datetime
-import os
-
-'''Put some text here to describe what's going on when you're ready
-'''
-
-# Makes folders for data
-paths = ['pickle', 'excel','json']
-for path in paths:
+try:                                    # can still run without non-standard library
+    from titlecase import titlecase
+    use_tc=True 
+except ModuleNotFoundError:
+    use_tc=False
+    
+def folder_checker(path):
+    # Makes folders for specific data types
     if not os.path.exists(path):
         os.mkdir(path)
 
@@ -48,7 +53,12 @@ def extract_zip_data(zip_file_path, save_pickle=True, save_excel=False,
     
     # Cleans up track title name to Title Case
     if clean_track_names: 
-        df['track'] = df['track'].str.title()
+        if use_tc:
+            df.track = [
+            titlecase(t) if t is not None else None for t in df.track
+            ]
+        else:
+            df.track = df.track.str.title()
     
     # Make a 'Song' column for graph representation/ easy searching
     df['song']=df['artist']+ ' – ' + df['track']
@@ -115,6 +125,7 @@ def make_song_frame(df, song_list, save_pickle=True, save_excel=False,):
 
 
 def _save_pickle(df, name):
+    folder_checker('pickle')
     print('Saving pickle...')
     filename = os.path.join('pickle', name + '.pkl')
     df.to_pickle(filename) 
@@ -123,6 +134,7 @@ def _save_pickle(df, name):
 
 
 def _save_excel(df, name):
+    folder_checker('excel')
     print('Saving Excel...\n...Patience is a virtue...')
     
     filename = os.path.join('excel', name + '.xlsx') 
@@ -140,6 +152,7 @@ def _save_excel(df, name):
 
 
 def _save_json(df,name):
+    folder_checker('json')
     print('Saving JSON...')
     filename = os.path.join('json', name + '.json')
         
@@ -156,7 +169,7 @@ def _save_json(df,name):
     
     return None
 
-if __name__ == "__main__":
+def main():
     '''If the file is run in the command line, turns the zip
     file into an excel file and does not save a pickle
     '''
@@ -168,3 +181,8 @@ if __name__ == "__main__":
     else:
         print(path,
             'not found, please make sure this script runs in the same folder')
+
+
+if __name__ == "__main__":
+    main()
+    
