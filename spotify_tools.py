@@ -11,6 +11,10 @@ try:                                    # can still run without non-standard lib
     from titlecase import titlecase
     use_tc=True 
 except ModuleNotFoundError:
+    print('''WARNING: titlecase module not found, defaulting to inbuilt 
+        string formating. For better results in future run: 
+        "$> pip install titlecase"
+        and try again''')
     use_tc=False
     
 def folder_checker(path):
@@ -53,6 +57,7 @@ def extract_zip_data(zip_file_path, save_pickle=True, save_excel=False,
     
     # Cleans up track title name to Title Case
     if clean_track_names: 
+        print("...cleaning track names...")
         if use_tc:
             df.track = [
             titlecase(t) if t is not None else None for t in df.track
@@ -180,7 +185,7 @@ def main():
         extract_zip_data(path, save_pickle=False, save_excel=True)
     else:
         print(path,
-            'not found, please make sure this script runs in the same folder')
+            'ZIP not found, please make sure this script runs in the same folder')
 
 
 if __name__ == "__main__":
